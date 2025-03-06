@@ -13,5 +13,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('conversations/{userId}', [MessageController::class, 'getConversation']);
         Route::post('send/{conversationId}', [MessageController::class, 'sendMessage']);
         Route::get('{conversationId}', [MessageController::class, 'getMessages']);
+        Route::post('/conversations/{conversationId}/typing', [MessageController::class, 'typing']);
     });
 });

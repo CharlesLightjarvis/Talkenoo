@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Events\MessageSent;
+use App\Events\UserTyping;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Conversation;
 use App\Models\MessageStatus;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -79,5 +81,26 @@ class MessageController extends Controller
         });
 
         return response()->json($messages);
+    }
+
+    public function typing(Request $request, $conversationId)
+    {
+        $request->validate([
+            'is_typing' => 'required|boolean',
+        ]);
+
+        $user = Auth::user();
+        if (!$user instanceof User) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Diffuser l'événement de saisie en excluant l'utilisateur actuel
+        broadcast(new UserTyping($user, $conversationId, $request->is_typing))->toOthers();
+
+        return response()->json(['status' => 'success']);
     }
 }

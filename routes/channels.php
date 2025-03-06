@@ -14,9 +14,9 @@ Broadcast::channel('chat.conversation.{conversationId}', function (User $user, $
 
 
 Broadcast::channel('typing.{conversationId}', function (User $user, $conversationId) {
-    return $user->conversations()->where('conversations.id', $conversationId)->exists();
+    return $user && $user->conversations()->where('conversations.id', $conversationId)->exists();
 });
 
 Broadcast::channel('online', function (User $user) {
-    return ['id' => $user->id, 'name' => $user->name];
+    return ['id' => $user->id, 'fullName' => $user->fullName];
 });
