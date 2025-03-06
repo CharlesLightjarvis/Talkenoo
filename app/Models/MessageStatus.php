@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MessageStatus extends Model
 {
-    protected $table = 'message_status';
-
+    use HasUuids;
     protected $fillable = [
         'id',
         'message_id',
@@ -24,7 +24,7 @@ class MessageStatus extends Model
 
     public function message(): BelongsTo
     {
-        return $this->belongsTo(Message::class);    
+        return $this->belongsTo(Message::class);
     }
 
     public function user(): BelongsTo

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Message extends Model
 {
-    use  SoftDeletes;
+    use  SoftDeletes, HasUuids;
 
     protected $fillable = [
         'id',
@@ -44,15 +45,15 @@ class Message extends Model
         return $this->hasMany(MessageStatus::class);
     }
 
-      // Un message peut avoir plusieurs statuts de lecture (un pour chaque utilisateur)
-      public function readStatuses()
-      {
-          return $this->hasMany(MessageStatus::class);
-      }
-  
-      // Helper pour vérifier si un utilisateur spécifique a lu ce message
-      public function isReadBy(User $user)
-      {
-          return $this->readStatuses()->where('user_id', $user->id)->where('is_read', true)->exists();
-      }
+    // Un message peut avoir plusieurs statuts de lecture (un pour chaque utilisateur)
+    public function readStatuses()
+    {
+        return $this->hasMany(MessageStatus::class);
+    }
+
+    // Helper pour vérifier si un utilisateur spécifique a lu ce message
+    public function isReadBy(User $user)
+    {
+        return $this->readStatuses()->where('user_id', $user->id)->where('is_read', true)->exists();
+    }
 }

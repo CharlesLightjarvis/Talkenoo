@@ -1,9 +1,8 @@
-
 <?php
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-    Route::get('hello', function () {
-       return 'Hello World';
-   }) ;
+// Protected Routes
+Route::middleware('auth:sanctum')->group(function () {
+    return "Hello World";
+});

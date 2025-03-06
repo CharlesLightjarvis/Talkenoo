@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,11 +15,11 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
+    use HasFactory, Notifiable, HasApiTokens, SoftDeletes, HasUuids;
 
     protected $fillable = [
         'fullName',
-        'email',    
+        'email',
         'phone',
         'profile_picture',
         'is_active',
@@ -26,13 +28,13 @@ class User extends Authenticatable
         'password',
     ];
 
-   
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-   
+
     protected function casts(): array
     {
         return [
@@ -50,7 +52,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Conversation::class, 'conversation_user', 'user_id', 'conversation_id');
     }
-    
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);

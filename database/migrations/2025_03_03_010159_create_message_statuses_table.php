@@ -11,15 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('message_status', function (Blueprint $table) {
+        Schema::create('message_statuses', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('message_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
-            $table->boolean('is_read')->default(false);
+            $table->enum('status', ['delivered', 'read'])->default('delivered');
             
+            $table->timestamp('delivered_at')->nullable();
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->unique(['message_id', 'user_id']);
         });
     }
 
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('message_status');
+        Schema::dropIfExists('message_statuses');
     }
 };

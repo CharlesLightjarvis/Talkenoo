@@ -3,48 +3,84 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Message;
 use App\Models\MessageStatus;
+use App\Models\Conversation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MessageStatusController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Update message status for a user
      */
-    public function index()
+    public function update(Request $request, Message $message)
     {
-        //
+        $request->validate([
+            'status' => 'required|in:delivered,read'
+        ]);
+
+        $status = MessageStatus::where('message_id', $message->id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $status->status = $request->status;
+        if ($request->status === 'read' && !$status->read_at) {
+            $status->read_at = now();
+        }
+        $status->save();
+
+        return response()->json($status);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Mark all messages in a conversation as read for the authenticated user
      */
-    public function store(Request $request)
+    public function markAllRead(Request $request)
     {
-        //
+        $request->validate([
+            'conversation_id' => 'required|exists:conversations,id'
+        ]);
+
+        $conversation = Conversation::findOrFail($request->conversation_id);
+        $this->authorize('view', $conversation);
+
+        $messageIds = Message::where('conversation_id', $request->conversation_id)
+            ->pluck('id');
+
+        MessageStatus::whereIn('message_id', $messageIds)
+            ->where('user_id', Auth::id())
+            ->where('status', '!=', 'read')
+            ->update([
+                'status' => 'read',
+                'read_at' => now()
+            ]);
+
+        return response()->json(['message' => 'All messages marked as read']);
     }
 
     /**
-     * Display the specified resource.
+     * Get unread message count for the authenticated user
      */
-    public function show(MessageStatus $messageStatus)
+    public function getUnreadCount(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'conversation_id' => 'nullable|exists:conversations,id'
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, MessageStatus $messageStatus)
-    {
-        //
-    }
+        $query = MessageStatus::where('user_id', Auth::id())
+            ->where('status', '!=', 'read');
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(MessageStatus $messageStatus)
-    {
-        //
+        if ($request->has('conversation_id')) {
+            $messageIds = Message::where('conversation_id', $request->conversation_id)
+                ->pluck('id');
+            $query->whereIn('message_id', $messageIds);
+        }
+
+        $unreadCount = $query->count();
+
+        return response()->json([
+            'unread_count' => $unreadCount
+        ]);
     }
 }
