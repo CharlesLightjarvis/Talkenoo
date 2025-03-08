@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Enums\StatusEnum;
+use App\Events\UserUpdateStatus;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -23,7 +25,7 @@ class UserController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('fullName', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -49,7 +51,7 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $this->authorize('update', $user);
+        // $this->authorize('update', $user);
 
         $validated = $request->validate([
             'fullName' => 'sometimes|string|max:255',
@@ -70,39 +72,11 @@ class UserController extends Controller
     }
 
     /**
-     * Update user's online status
-     */
-    public function updateOnlineStatus(Request $request)
-    {
-        $user = Auth::user();
-        $user->is_active = $request->boolean('is_active');
-        $user->last_active = now();
-        $user->save();
-
-        return response()->json(['message' => 'Status updated successfully']);
-    }
-
-    /**
      * Get the authenticated user's profile
      */
-    public function profile()
+    public function me()
     {
         $user = Auth::user();
         return response()->json($user);
-    }
-
-    /**
-     * Get user's conversations
-     */
-    public function conversations(User $user)
-    {
-        $this->authorize('viewConversations', $user);
-
-        $conversations = $user->conversations()
-            ->with(['lastMessage', 'participants'])
-            ->orderBy('updated_at', 'desc')
-            ->paginate(20);
-
-        return response()->json($conversations);
     }
 }

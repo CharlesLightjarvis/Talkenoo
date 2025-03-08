@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('message_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['delivered', 'read'])->default('delivered');
-            
+            $table->enum('status', ['sent', 'delivered', 'read'])->default('sent');
+
             $table->timestamp('delivered_at')->nullable();
             $table->timestamp('read_at')->nullable();
             $table->timestamps();

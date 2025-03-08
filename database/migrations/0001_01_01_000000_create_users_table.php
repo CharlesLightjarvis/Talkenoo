@@ -20,14 +20,13 @@ return new class extends Migration
             $table->string('password', 255);
             $table->string('profile_picture')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->enum('status', StatusEnum::values())->default(StatusEnum::ONLINE);
+            $table->enum('status', StatusEnum::values())->default(StatusEnum::OFFLINE);
             $table->timestamp('last_active')->nullable();
-            $table->timestamp('email_verified_at')->nullable(); 
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
 
             $table->softDeletes();
-
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
